@@ -36,17 +36,20 @@ function App() {
   };
 
   const handleSaveStudy = (s) => {
-    const prefix = s.name.replace(/\s+/g, '-').slice(0, 6).toUpperCase() || 'STU';
-    setStudy({
-      id: `study-${Date.now()}`,
+    const followUp = s.followUpCount
+      ? `${s.followUpCount} visits · every ${s.followUpInterval?.value} ${s.followUpInterval?.unit}`
+      : s.followUp || '';
+    setStudy((prev) => ({
+      id: prev?.id || `study-${Date.now()}`,
       shortName: s.name.length > 50 ? s.name.slice(0, 50) + '…' : s.name,
-      screened: 0,
-      patients: [],
+      screened: prev?.screened || 0,
+      patients: prev?.patients || [],
       ...s,
       arms: s.arms.map((a) => ({ ...a, target: parseInt(a.target) || 0 })),
-    });
+      followUp,
+    }));
     setScreen('dashboard');
-    showToast('Study saved. Welcome to your dashboard.');
+    showToast('Study saved.');
   };
 
   const handleSkipDesign = () => {
@@ -59,11 +62,16 @@ function App() {
       sampleSize: 60,
       startDate: new Date().toISOString().slice(0, 10),
       endDate: new Date(Date.now() + 180 * 86400000).toISOString().slice(0, 10),
-      followUp: 'Monthly for 6 months',
+      followUpCount: 4,
+      followUpInterval: { value: 1, unit: 'months' },
+      followUp: '4 visits · every 1 months',
       screened: 0,
       patients: [],
       baselineFields: [{ name: 'Systolic BP', type: 'number', unit: 'mmHg' }, { name: 'Diastolic BP', type: 'number', unit: 'mmHg' }],
-      followUpFields: [{ name: 'Systolic BP', type: 'number', unit: 'mmHg' }, { name: 'Side effects', type: 'text' }],
+      followUpFields: [
+        { name: 'Systolic BP', type: 'number', unit: 'mmHg', visits: [true, true, true, true] },
+        { name: 'Side effects', type: 'text', visits: [true, true, true, true] },
+      ],
     });
     setScreen('dashboard');
   };
