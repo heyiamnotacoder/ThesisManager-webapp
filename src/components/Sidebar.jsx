@@ -1,6 +1,6 @@
 import { Icon } from '../lib/icons';
 
-export function Sidebar({ screen, setScreen, user, study, overdueCount, collapsed, onToggle }) {
+export function Sidebar({ screen, setScreen, user, study, overdueCount, collapsed, onToggle, onSignOut }) {
   const items = [
     { id: 'dashboard', icon: 'home', label: 'Dashboard' },
     { id: 'detail', icon: 'users', label: 'Patients' },
@@ -52,9 +52,14 @@ export function Sidebar({ screen, setScreen, user, study, overdueCount, collapse
         <div className="avatar">{initials(user?.name)}</div>
         {!collapsed && (
           <div className="user-meta">
-            <strong>{user?.name || 'Dr. Aanya Reddy'}</strong>
-            <span>{user?.email || 'aanya@medcollege.edu'}</span>
+            <strong>{user?.name}</strong>
+            <span>{user?.email}</span>
           </div>
+        )}
+        {onSignOut && (
+          <button className="nav-item" onClick={onSignOut} title="Sign out" style={{ marginLeft: 'auto', flexShrink: 0 }}>
+            <Icon name="logOut" size={15}/>
+          </button>
         )}
       </div>
     </aside>

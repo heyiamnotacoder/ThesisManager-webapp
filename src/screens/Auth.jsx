@@ -16,7 +16,7 @@ export function AuthScreen({ onSubmit }) {
   const submit = (e) => {
     e.preventDefault();
     if (!valid) return;
-    onSubmit({ name: name || 'Dr. Aanya Reddy', email: email || 'aanya@medcollege.edu' });
+    onSubmit({ name, email, password, mode });
   };
 
   const switchMode = (m) => {
