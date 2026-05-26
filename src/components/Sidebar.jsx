@@ -57,7 +57,7 @@ export function Sidebar({ screen, setScreen, user, study, overdueCount, collapse
           </div>
         )}
         {onSignOut && (
-          <button className="nav-item" onClick={onSignOut} title="Sign out" style={{ marginLeft: 'auto', flexShrink: 0 }}>
+          <button className="nav-item" onClick={onSignOut} style={{ marginLeft: 'auto', flexShrink: 0 }}>
             <Icon name="logOut" size={15}/>
           </button>
         )}

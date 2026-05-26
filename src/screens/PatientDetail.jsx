@@ -109,10 +109,10 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
             <div style={{ fontSize: 14, fontWeight: 600, marginTop: 6, opacity: 0.95 }}>{fmtDate(p.enrollDate)}</div>
           </div>
           <div>
-            <div className="hero-metric-label">Visits done</div>
+            <div className="hero-metric-label">Follow-ups done</div>
             <div style={{ marginTop: 4 }}>
               <span style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em' }}>{p.completedVisits}</span>
-              <span style={{ fontSize: 14, opacity: 0.55, fontWeight: 400 }}> / {p.totalVisits}</span>
+              <span style={{ fontSize: 14, opacity: 0.55, fontWeight: 400 }}> / {visitCount}</span>
             </div>
           </div>
           <div>
@@ -224,11 +224,9 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
                     <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 2 }}>
                       {fmtDateShort(v.date)}
                     </div>
-                    {v.isCurrent && (
-                      <div style={{ fontSize: 10, marginTop: 3, fontWeight: 600,
-                        color: v.isOverdue ? 'var(--red)' : 'var(--amber)',
-                      }}>
-                        {v.isOverdue ? `${p.overdueDays}d overdue` : 'upcoming'}
+                    {v.isCurrent && v.isOverdue && (
+                      <div style={{ fontSize: 10, marginTop: 3, fontWeight: 600, color: 'var(--red)' }}>
+                        {p.overdueDays}d overdue
                       </div>
                     )}
                   </div>
@@ -247,37 +245,36 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
       </div>
 
       {/* ── Baseline data ── */}
-      {study.baselineFields.length > 0 && (
-        <div className="card">
-          <div className="card-head">
-            <Icon name="file" size={15} style={{ color: 'var(--text-subtle)' }}/>
-            <h3 className="card-title">Baseline data</h3>
-            <span className="card-sub">Recorded at enrollment · {study.baselineFields.length} fields</span>
+      {(() => {
+        const recordedFields = study.baselineFields.filter((f) => p.baseline?.[f.name] != null);
+        return recordedFields.length > 0 && (
+          <div className="card">
+            <div className="card-head">
+              <Icon name="file" size={15} style={{ color: 'var(--text-subtle)' }}/>
+              <h3 className="card-title">Baseline data</h3>
+              <span className="card-sub">Recorded at enrollment · {recordedFields.length} fields</span>
+            </div>
+            <div className="card-body tight">
+              <table className="table">
+                <thead>
+                  <tr><th>Field</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                  {recordedFields.map((f, i) => (
+                    <tr key={i}>
+                      <td style={{ fontWeight: 500 }}>
+                        {f.name}
+                        {f.unit && <span className="subtle" style={{ marginLeft: 5, fontWeight: 400 }}>({f.unit})</span>}
+                      </td>
+                      <td><span className="mono">{p.baseline[f.name]}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="card-body tight">
-            <table className="table">
-              <thead>
-                <tr><th>Field</th><th>Value</th></tr>
-              </thead>
-              <tbody>
-                {study.baselineFields.map((f, i) => (
-                  <tr key={i}>
-                    <td style={{ fontWeight: 500 }}>
-                      {f.name}
-                      {f.unit && <span className="subtle" style={{ marginLeft: 5, fontWeight: 400 }}>({f.unit})</span>}
-                    </td>
-                    <td>
-                      {p.baseline?.[f.name] != null
-                        ? <span className="mono">{p.baseline[f.name]}</span>
-                        : <span className="subtle xs">Not recorded</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
