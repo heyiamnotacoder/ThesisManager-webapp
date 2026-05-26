@@ -73,9 +73,9 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
             <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap', fontSize: 13, opacity: 0.88 }}>
               <span style={{
                 background: armColor + '40', border: `1px solid ${armColor}80`,
-                borderRadius: 99, padding: '3px 12px', fontWeight: 600, color: '#fff',
+                borderRadius: 99, padding: '3px 12px', fontWeight: 500, color: '#fff',
               }}>
-                Arm {String.fromCharCode(65 + p.arm)} — {arm?.name}
+                {arm?.name}
               </span>
               <span>{p.age} yrs · {p.sex === 'M' ? 'Male' : p.sex === 'F' ? 'Female' : 'Other'}</span>
               <span>CR: {p.crNo}</span>
@@ -110,15 +110,14 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
           </div>
           <div>
             <div className="hero-metric-label">Follow-ups done</div>
-            <div style={{ marginTop: 4 }}>
-              <span style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em' }}>{p.completedVisits}</span>
-              <span style={{ fontSize: 14, opacity: 0.55, fontWeight: 400 }}> / {visitCount}</span>
+            <div style={{ fontSize: 14, fontWeight: 600, marginTop: 6, opacity: 0.95 }}>
+              {p.completedVisits} / {visitCount}
             </div>
           </div>
           <div>
             <div className="hero-metric-label">Follow-up interval</div>
             <div style={{ fontSize: 14, fontWeight: 600, marginTop: 6, opacity: 0.95 }}>
-              {interval.value} {interval.unit}
+              {interval.value} {interval.value === 1 ? interval.unit.replace(/s$/, '') : interval.unit}
             </div>
           </div>
           <div>
@@ -166,7 +165,7 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
                   border: `1px solid ${armColor}44`,
                   borderRadius: 99, padding: '2px 10px', fontSize: 12.5, fontWeight: 600,
                 }}>
-                  {String.fromCharCode(65 + p.arm)} — {arm?.name}
+                  {arm?.name}
                 </span>
               )],
               ['Interval', `${interval.value} ${interval.unit}`],

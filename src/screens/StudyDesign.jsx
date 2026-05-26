@@ -136,7 +136,7 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
                 ) : (
                   <div className="field-builder">
                     {study.baselineFields.map((f, i) => (
-                      <div key={i} className="field-builder-row" style={{ pointerEvents: 'none' }}>
+                      <div key={i} className="field-builder-row" style={{ pointerEvents: 'none', gridTemplateColumns: '1fr' }}>
                         <div className="input" style={{ background: 'var(--surface-2, var(--surface))' }}>
                           {f.name}{f.unit ? ` (${f.unit})` : ''}
                         </div>
