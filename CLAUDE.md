@@ -22,8 +22,8 @@ src/
 │   ├── helpers.js           # Date formatters, color utils (shade/hexA/tinted), ARM_COLORS
 │   └── icons.jsx            # SVG icon component — add new paths here
 ├── components/
-│   ├── Sidebar.jsx          # Collapsible left nav with study pill + user footer
-│   └── Topbar.jsx           # Page title bar with breadcrumb and notification dot
+│   ├── Sidebar.jsx          # Left nav with study pill + user footer (no collapse)
+│   └── Topbar.jsx           # Page title bar with breadcrumb
 └── screens/
     ├── Auth.jsx             # Sign up / sign in split layout
     ├── StudyDesign.jsx      # Study setup wizard (name, arms, timeline, fields)
@@ -63,8 +63,9 @@ All state lives in `App.jsx`; persisted to Supabase. The active study object sha
     enrollDate,      // Date object
     status,          // 'active' | 'completed' | 'lost'
     completedVisits, totalVisits,
-    nextVisitDate,   // Date | null — stored in DB as follow-up interval after enroll
-    overdueDays,     // 0 if not overdue
+    nextVisitDate,   // Date | null — computed dynamically via withComputedNextVisit() in App.jsx
+                     //   = enrollDate + (completedVisits+1) × followUpInterval (NOT the DB value)
+    overdueDays,     // 0 if not overdue — also recomputed dynamically, not from DB
     baseline,        // { [fieldName]: value }
   }]
 }
@@ -80,6 +81,9 @@ All state lives in `App.jsx`; persisted to Supabase. The active study object sha
 - Baseline fields have **no `type`** — they are informational only (shown as chips in AddPatient). Only follow-up fields carry a type (`text` | `number` | `date`).
 - Adding a baseline field in `StudyDesign` automatically copies it to follow-up fields (one-time copy on add, independent after).
 - Follow-up dates are computed as `enrollDate + n × followUpInterval` everywhere (AddPatient display, PatientDetail timeline, DB `next_visit_date`).
+- `nextVisitDate` / `overdueDays` are **always recomputed** from live study+patient data via `withComputedNextVisit()` (App.jsx) — never trust the stored DB `next_visit_date` value, which can go stale if the study interval changes.
+- PatientDetail baseline section only renders fields that have a recorded value (`p.baseline[f.name] != null`); fields with no data are hidden.
+- Sidebar has no collapse toggle — the Account section was removed; sidebar is always expanded.
 
 ## Supabase schema
 
