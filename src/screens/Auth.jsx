@@ -6,13 +6,22 @@ export function AuthScreen({ onSubmit }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const valid = mode === 'signup' ? (name && email && password.length >= 6) : (email && password);
+  const passwordMismatch = mode === 'signup' && confirmPassword.length > 0 && password !== confirmPassword;
+  const valid = mode === 'signup'
+    ? (name && email && password.length >= 6 && password === confirmPassword)
+    : (email && password);
 
   const submit = (e) => {
     e.preventDefault();
     if (!valid) return;
     onSubmit({ name: name || 'Dr. Aanya Reddy', email: email || 'aanya@medcollege.edu' });
+  };
+
+  const switchMode = (m) => {
+    setMode(m);
+    setConfirmPassword('');
   };
 
   return (
@@ -39,14 +48,13 @@ export function AuthScreen({ onSubmit }) {
             ))}
           </div>
         </div>
-        <div className="auth-foot">Used by residents at 40+ medical colleges. HIPAA-aware.</div>
       </aside>
 
       <main className="auth-main">
         <form className="auth-form" onSubmit={submit}>
           <div className="auth-tabs">
-            <button type="button" className="auth-tab" data-active={mode === 'signin'} onClick={() => setMode('signin')}>Sign in</button>
-            <button type="button" className="auth-tab" data-active={mode === 'signup'} onClick={() => setMode('signup')}>Sign up</button>
+            <button type="button" className="auth-tab" data-active={mode === 'signin'} onClick={() => switchMode('signin')}>Sign in</button>
+            <button type="button" className="auth-tab" data-active={mode === 'signup'} onClick={() => switchMode('signup')}>Sign up</button>
           </div>
 
           <h1>{mode === 'signup' ? 'Create your account' : 'Welcome back'}</h1>
@@ -68,7 +76,7 @@ export function AuthScreen({ onSubmit }) {
             <label className="label">Email</label>
             <div className="input-group">
               <Icon name="mail" size={14}/>
-              <input type="email" className="input" placeholder="you@medcollege.edu" value={email} onChange={(e) => setEmail(e.target.value)}/>
+              <input type="email" className="input" placeholder="name@email.com" value={email} onChange={(e) => setEmail(e.target.value)}/>
             </div>
           </div>
 
@@ -80,6 +88,17 @@ export function AuthScreen({ onSubmit }) {
             </div>
           </div>
 
+          {mode === 'signup' && (
+            <div className="field">
+              <label className="label">Confirm password</label>
+              <div className="input-group">
+                <Icon name="lock" size={14}/>
+                <input type="password" className="input" placeholder="Repeat your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+              </div>
+              {passwordMismatch && <div className="hint" style={{ color: '#ef4444', marginTop: 4 }}>Passwords do not match.</div>}
+            </div>
+          )}
+
           <button type="submit" className="btn btn-primary btn-lg" disabled={!valid}>
             {mode === 'signup' ? 'Create account' : 'Sign in'}
             <Icon name="arrowRight" size={14}/>
@@ -87,9 +106,9 @@ export function AuthScreen({ onSubmit }) {
 
           <div className="auth-foot-link">
             {mode === 'signup' ? (
-              <>Already have an account? <a onClick={() => setMode('signin')}>Sign in</a></>
+              <>Already have an account? <a onClick={() => switchMode('signin')}>Sign in</a></>
             ) : (
-              <>New to ThesisManager? <a onClick={() => setMode('signup')}>Create an account</a></>
+              <>New to ThesisManager? <a onClick={() => switchMode('signup')}>Create an account</a></>
             )}
           </div>
         </form>

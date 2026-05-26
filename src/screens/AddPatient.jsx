@@ -8,62 +8,18 @@ export function AddPatientScreen({ study, onSave, onCancel }) {
     arm: study.patients.length % study.arms.length,
     enrollDate: '2026-05-25',
     consent: false,
-    baseline: study.baselineFields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {}),
+    baseline: {},
   });
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
-  const setBL = (name, value) => setForm((f) => ({ ...f, baseline: { ...f.baseline, [name]: value } }));
 
   const valid = form.name && form.age && form.phone && form.crNo && form.consent;
   const armCounts = study.arms.map((_, i) => study.patients.filter((p) => p.arm === i).length);
 
   return (
     <div className="content">
-      <section className="hero">
-        <div className="hero-grid no-ring">
-          <div className="hero-content">
-            <div>
-              <div className="hero-eyebrow">Enrolling into · {study.type}</div>
-              <h2 className="hero-title">{form.name ? `${form.name} → ${study.shortName || study.name}` : 'Add a new patient'}</h2>
-            </div>
-            <p className="hero-sub">
-              {study.patients.length} of {study.sampleSize} enrolled — {study.sampleSize - study.patients.length} slots left.
-              {' '}{study.type === 'RCT'
-                ? <>Block randomisation suggests <strong>{study.arms[form.arm].name}</strong> for the next allocation.</>
-                : <>This is an observational cohort; all participants enter the same arm.</>
-              }
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${study.arms.length}, 1fr)`, gap: 14, marginTop: 4 }}>
-              {study.arms.map((arm, i) => {
-                const n = armCounts[i] + (form.arm === i ? 1 : 0);
-                const isSelected = form.arm === i;
-                return (
-                  <div key={i} style={{ background: isSelected ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)', border: '1px solid ' + (isSelected ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'), borderRadius: 10, padding: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span className="ring-arm-chip" style={{ background: isSelected ? '#fff' : 'rgba(255,255,255,0.18)', color: isSelected ? 'var(--primary)' : '#fff', borderColor: 'transparent' }}>
-                        {String.fromCharCode(65 + i)}
-                      </span>
-                      <strong style={{ fontSize: 13, fontWeight: 600 }}>{arm.name}</strong>
-                      {isSelected && <span style={{ marginLeft: 'auto', fontSize: 10.5, padding: '2px 7px', background: '#fff', color: 'var(--primary)', borderRadius: 99, fontWeight: 600 }}>NEW</span>}
-                    </div>
-                    <div className="stack-bar" style={{ height: 6 }}>
-                      <div style={{ width: `${armCounts[i] / arm.target * 100}%`, background: 'rgba(255,255,255,0.85)' }}/>
-                      {isSelected && <div style={{ width: `${1 / arm.target * 100}%`, background: '#86efac' }}/>}
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginTop: 6, opacity: 0.85 }}>
-                      <span className="mono">{n} / {arm.target}</span>
-                      <span>{arm.target - n} slot{arm.target - n !== 1 ? 's' : ''} left</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
       <div className="page-head" style={{ marginBottom: 20 }}>
         <div>
-          <h2>Patient details</h2>
+          <h2>Add a new patient</h2>
           <p className="sub">Required fields are marked with an asterisk.</p>
         </div>
         <div className="page-head-actions">
@@ -154,19 +110,27 @@ export function AddPatientScreen({ study, onSave, onCancel }) {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-head">
-            <h3 className="card-title">Baseline data</h3>
-            <span className="card-sub">Recorded once at enrollment</span>
-          </div>
-          <div className="card-body">
-            <div className="field-row">
-              {study.baselineFields.map((f, i) => (
-                <BaselineField key={i} field={f} value={form.baseline[f.name]} onChange={(v) => setBL(f.name, v)}/>
-              ))}
+        {study.baselineFields.length > 0 && (
+          <div className="card">
+            <div className="card-head">
+              <h3 className="card-title">Baseline fields</h3>
+              <span className="card-sub">Recorded once at enrollment · defined in study design</span>
+            </div>
+            <div className="card-body">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {study.baselineFields.map((f, i) => (
+                  <span key={i} className="chip">
+                    {f.name}{f.unit ? ` (${f.unit})` : ''}
+                    <span className="subtle" style={{ marginLeft: 5, opacity: 0.6 }}>· {f.type}</span>
+                  </span>
+                ))}
+              </div>
+              <div className="hint" style={{ marginTop: 10 }}>
+                These fields will be collected using your data sheets. Values are recorded outside this app.
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="card">
           <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -186,43 +150,6 @@ export function AddPatientScreen({ study, onSave, onCancel }) {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function BaselineField({ field, value, onChange }) {
-  if (field.type === 'dropdown') {
-    const opts = (field.options || '').split(',').map((s) => s.trim()).filter(Boolean);
-    return (
-      <div className="field">
-        <label className="label">{field.name} {field.unit && <span className="hint">({field.unit})</span>}</label>
-        <select className="select" value={value || ''} onChange={(e) => onChange(e.target.value)}>
-          <option value="">Select…</option>
-          {opts.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </div>
-    );
-  }
-  if (field.type === 'number') {
-    return (
-      <div className="field">
-        <label className="label">{field.name} {field.unit && <span className="hint">({field.unit})</span>}</label>
-        <input type="number" className="input mono" value={value || ''} onChange={(e) => onChange(e.target.value)}/>
-      </div>
-    );
-  }
-  if (field.type === 'date') {
-    return (
-      <div className="field">
-        <label className="label">{field.name}</label>
-        <input type="date" className="input" value={value || ''} onChange={(e) => onChange(e.target.value)}/>
-      </div>
-    );
-  }
-  return (
-    <div className="field">
-      <label className="label">{field.name}</label>
-      <input className="input" value={value || ''} onChange={(e) => onChange(e.target.value)}/>
     </div>
   );
 }
