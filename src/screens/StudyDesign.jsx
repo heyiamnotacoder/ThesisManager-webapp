@@ -13,8 +13,8 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
     followUpCount: 4,
     followUpInterval: { value: 1, unit: 'months' },
     baselineFields: [
-      { name: 'Systolic BP', type: 'number', unit: 'mmHg' },
-      { name: 'Diastolic BP', type: 'number', unit: 'mmHg' },
+      { name: 'Systolic BP', unit: 'mmHg' },
+      { name: 'Diastolic BP', unit: 'mmHg' },
     ],
     followUpFields: [
       { name: 'Systolic BP', type: 'number', unit: 'mmHg', visits: [true, true, true, true] },
@@ -58,10 +58,13 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
     update({ [kind]: list });
   };
   const addField = (kind) => {
-    const newField = kind === 'followUpFields'
-      ? { name: '', type: 'text', visits: Array(study.followUpCount || 1).fill(true) }
-      : { name: '', type: 'text' };
-    update({ [kind]: [...study[kind], newField] });
+    if (kind === 'baselineFields') {
+      const blank = { name: '' };
+      const blankFu = { name: '', type: 'text', visits: Array(study.followUpCount || 1).fill(true) };
+      update({ baselineFields: [...study.baselineFields, blank], followUpFields: [...study.followUpFields, blankFu] });
+    } else {
+      update({ followUpFields: [...study.followUpFields, { name: '', type: 'text', visits: Array(study.followUpCount || 1).fill(true) }] });
+    }
   };
   const removeField = (kind, i) => update({ [kind]: study[kind].filter((_, idx) => idx !== i) });
 
@@ -136,9 +139,6 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
                       <div key={i} className="field-builder-row" style={{ pointerEvents: 'none' }}>
                         <div className="input" style={{ background: 'var(--surface-2, var(--surface))' }}>
                           {f.name}{f.unit ? ` (${f.unit})` : ''}
-                        </div>
-                        <div className="select" style={{ background: 'var(--surface-2, var(--surface))', display: 'flex', alignItems: 'center' }}>
-                          {f.type}
                         </div>
                       </div>
                     ))}
@@ -316,7 +316,7 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
             </div>
           </div>
 
-          <FieldBuilderCard title="4. Baseline data fields" sub="What you record once, at enrollment."
+          <FieldBuilderCard title="4. Baseline data fields" sub="What you record once, at enrollment." showType={false}
             fields={study.baselineFields}
             onAdd={() => addField('baselineFields')}
             onUpdate={(i, patch) => updateField('baselineFields', i, patch)}
@@ -341,7 +341,7 @@ export function StudyDesignScreen({ initialStudy, onSave, onSkip }) {
   );
 }
 
-function FieldBuilderCard({ title, sub, fields, onAdd, onUpdate, onRemove, visitCount }) {
+function FieldBuilderCard({ title, sub, fields, onAdd, onUpdate, onRemove, visitCount, showType = true }) {
   return (
     <div className="card">
       <div className="card-head">
@@ -358,12 +358,13 @@ function FieldBuilderCard({ title, sub, fields, onAdd, onUpdate, onRemove, visit
             <div key={i} className="field-builder-row" style={{ flexWrap: 'wrap', rowGap: 6 }}>
               <input className="input" placeholder="Field name (e.g. Systolic BP)"
                 value={f.name} onChange={(e) => onUpdate(i, { name: e.target.value })}/>
-              <select className="select" value={f.type} onChange={(e) => onUpdate(i, { type: e.target.value })}>
-                <option value="text">Text</option>
-                <option value="number">Number</option>
-                <option value="dropdown">Dropdown</option>
-                <option value="date">Date</option>
-              </select>
+              {showType && (
+                <select className="select" value={f.type} onChange={(e) => onUpdate(i, { type: e.target.value })}>
+                  <option value="text">Text</option>
+                  <option value="number">Number</option>
+                  <option value="date">Date</option>
+                </select>
+              )}
               {visitCount > 0 && (
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 12 }}>
                   {Array.from({ length: visitCount }).map((_, v) => (

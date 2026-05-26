@@ -1,6 +1,6 @@
 # ThesisManager — webapp
 
-Clinical thesis workspace for medical students running trials. Prototype built with Vite + React (JavaScript, no TypeScript). All data is hardcoded/in-memory — no backend, no database.
+Clinical thesis workspace for medical students running trials. Prototype built with Vite + React (JavaScript, no TypeScript). Backed by Supabase (auth, studies, patients).
 
 ## Commands
 
@@ -14,49 +14,56 @@ npm run preview  # preview production build
 
 ```
 src/
-├── App.jsx                  # Root shell: auth gate, routing, global state
+├── App.jsx                  # Root shell: auth gate, routing, global state, Supabase handlers
 ├── main.jsx                 # ReactDOM.createRoot entry
 ├── styles.css               # Full design system (tokens, components, layouts)
+├── lib/
+│   ├── supabase.js          # Supabase client singleton (reads from .env)
+│   ├── helpers.js           # Date formatters, color utils (shade/hexA/tinted), ARM_COLORS
+│   └── icons.jsx            # SVG icon component — add new paths here
 ├── components/
 │   ├── Sidebar.jsx          # Collapsible left nav with study pill + user footer
 │   └── Topbar.jsx           # Page title bar with breadcrumb and notification dot
-├── lib/
-│   ├── helpers.js           # Date formatters, color utils (shade/hexA/tinted), ARM_COLORS
-│   └── icons.jsx            # SVG icon component — add new paths here
 └── screens/
     ├── Auth.jsx             # Sign up / sign in split layout
     ├── StudyDesign.jsx      # Study setup wizard (name, arms, timeline, fields)
     ├── Dashboard.jsx        # Hero ring + arm bars + notifications + activity
-    ├── StudyDetail.jsx      # Patient table grouped by arm with filter bar
-    └── AddPatient.jsx       # Enrollment form with arm allocation + baseline fields
+    ├── StudyDetail.jsx      # Patient table grouped by arm with filter bar; rows navigate to PatientDetail
+    ├── PatientDetail.jsx    # Full patient profile: hero, demographics, visit timeline, baseline data
+    └── AddPatient.jsx       # Enrollment form with arm allocation + computed follow-up dates
 ```
 
 ## Screen flow
 
 ```
-Auth → StudyDesign → Dashboard ←→ StudyDetail
+Auth → StudyDesign → Dashboard ←→ StudyDetail ←→ PatientDetail
                               ←→ AddPatient
                               ←→ StudyDesign (edit mode)
 ```
 
+`App.jsx` holds `selectedPatient` state; clicking a row in `StudyDetail` sets it and navigates to `patient-detail`.
+
 ## Data model
 
-All state lives in `App.jsx`. The active study object shape:
+All state lives in `App.jsx`; persisted to Supabase. The active study object shape:
 
 ```js
 {
   id, name, shortName, type,           // 'RCT' | 'Observational'
   arms: [{ name, target }],
   sampleSize, startDate, endDate, followUp, screened,
-  baselineFields: [{ name, type, unit?, options? }],
-  followUpFields:  [{ name, type, unit?, options? }],
+  followUpCount, followUpInterval: { value, unit },  // unit: 'days' | 'months'
+  baselineFields: [{ name, unit? }],           // no `type` — shown as reference only
+  followUpFields:  [{ name, type, unit?, visits: boolean[] }],
   patients: [{
-    id, crNo, name, age, sex, phone, relativePhone,
+    id,              // display_id e.g. "AMC-1001"
+    _uuid,           // Supabase row id
+    crNo, name, age, sex, phone, relativePhone,
     arm,             // index into study.arms
     enrollDate,      // Date object
     status,          // 'active' | 'completed' | 'lost'
     completedVisits, totalVisits,
-    nextVisitDate,   // Date | null
+    nextVisitDate,   // Date | null — stored in DB as follow-up interval after enroll
     overdueDays,     // 0 if not overdue
     baseline,        // { [fieldName]: value }
   }]
@@ -67,9 +74,20 @@ All state lives in `App.jsx`. The active study object shape:
 
 - `TODAY` constant in `helpers.js` drives all date math (`daysFromNow`) — update it for demos.
 - `ARM_COLORS` array in `helpers.js` maps arm index → hex color. Currently supports 3 arms.
-- The `StatusPill` component is exported from `Dashboard.jsx` and reused in `StudyDetail.jsx`.
+- `StatusPill` exported from `Dashboard.jsx` — reused in `StudyDetail.jsx` and `PatientDetail.jsx`.
 - No routing library — screen state is a plain string in `App.jsx` (`setScreen`).
 - Dark mode toggled via `document.documentElement.dataset.theme = 'dark' | 'light'`.
+- Baseline fields have **no `type`** — they are informational only (shown as chips in AddPatient). Only follow-up fields carry a type (`text` | `number` | `date`).
+- Adding a baseline field in `StudyDesign` automatically copies it to follow-up fields (one-time copy on add, independent after).
+- Follow-up dates are computed as `enrollDate + n × followUpInterval` everywhere (AddPatient display, PatientDetail timeline, DB `next_visit_date`).
+
+## Supabase schema
+
+- `profiles` — links `auth.users`, stores `full_name`
+- `studies` — `arms`, `baseline_fields`, `followup_fields` as JSONB arrays; `user_id` FK
+- `patients` — `display_id`, `arm` as integer index, `baseline` as JSONB; `study_id` FK
+
+`studyToRow` / `rowToStudy` / `rowToPatient` in `App.jsx` handle all mapping.
 
 ## Adding features
 
@@ -77,4 +95,4 @@ All state lives in `App.jsx`. The active study object shape:
 
 **New icon**: add an entry to the `paths` object in `lib/icons.jsx`.
 
-**New field type in baseline/follow-up**: add a case to `BaselineField` in `AddPatient.jsx`.
+**New follow-up field type**: add a `<option>` to the type `<select>` in `FieldBuilderCard` (`StudyDesign.jsx`) and a render case in the follow-up form if one is built.

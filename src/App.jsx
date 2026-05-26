@@ -6,6 +6,7 @@ import { StudyDesignScreen } from './screens/StudyDesign';
 import { DashboardScreen } from './screens/Dashboard';
 import { AddPatientScreen } from './screens/AddPatient';
 import { StudyDetailScreen } from './screens/StudyDetail';
+import { PatientDetailScreen } from './screens/PatientDetail';
 import { Icon } from './lib/icons';
 import { shade, hexA, tinted, daysFromNow } from './lib/helpers';
 import { supabase } from './lib/supabase';
@@ -73,7 +74,7 @@ function studyToRow(s, userId) {
     follow_up_interval_unit: s.followUpInterval?.unit || null,
     follow_up: followUp,
     arms,
-    baseline_fields: s.baselineFields || [],
+    baseline_fields: (s.baselineFields || []).map(({ type: _t, ...rest }) => rest),
     followup_fields: s.followUpFields || [],
   };
 }
@@ -84,6 +85,7 @@ function App() {
   const [screen, setScreen] = useState('loading');
   const [user, setUser] = useState(null);
   const [study, setStudy] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -209,8 +211,8 @@ function App() {
       followUpCount: 4,
       followUpInterval: { value: 1, unit: 'months' },
       baselineFields: [
-        { name: 'Systolic BP', type: 'number', unit: 'mmHg' },
-        { name: 'Diastolic BP', type: 'number', unit: 'mmHg' },
+        { name: 'Systolic BP', unit: 'mmHg' },
+        { name: 'Diastolic BP', unit: 'mmHg' },
       ],
       followUpFields: [
         { name: 'Systolic BP', type: 'number', unit: 'mmHg', visits: [true, true, true, true] },
@@ -250,7 +252,9 @@ function App() {
     const displayId = `${prefix}-${String(1001 + (count || 0)).padStart(4, '0')}`;
 
     const nextVisitDate = new Date(p.enrollDate);
-    nextVisitDate.setDate(nextVisitDate.getDate() + 30);
+    const fuInterval = study.followUpInterval || { value: 1, unit: 'months' };
+    if (fuInterval.unit === 'months') nextVisitDate.setMonth(nextVisitDate.getMonth() + fuInterval.value);
+    else nextVisitDate.setDate(nextVisitDate.getDate() + fuInterval.value);
 
     const row = {
       display_id: displayId,
@@ -306,7 +310,8 @@ function App() {
         <Topbar screen={screen} overdueCount={overdueCount} study={study} />
         {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} />}
         {screen === 'add' && study && <AddPatientScreen study={study} onSave={handleAddPatient} onCancel={() => setScreen('dashboard')} />}
-        {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} />}
+        {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} onSelectPatient={(p) => { setSelectedPatient(p); setScreen('patient-detail'); }} />}
+        {screen === 'patient-detail' && study && selectedPatient && <PatientDetailScreen patient={selectedPatient} study={study} onBack={() => setScreen('detail')} />}
         {screen === 'design-edit' && study && <StudyDesignScreen initialStudy={study} onSave={handleSaveStudy} onSkip={() => setScreen('dashboard')} />}
       </div>
 

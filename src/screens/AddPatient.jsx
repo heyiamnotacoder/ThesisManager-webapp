@@ -15,6 +15,16 @@ export function AddPatientScreen({ study, onSave, onCancel }) {
   const valid = form.name && form.age && form.phone && form.crNo && form.consent;
   const armCounts = study.arms.map((_, i) => study.patients.filter((p) => p.arm === i).length);
 
+  const interval = study.followUpInterval || { value: 1, unit: 'months' };
+  const applyInterval = (dateStr, count = 1) => {
+    const d = new Date(dateStr);
+    if (interval.unit === 'months') d.setMonth(d.getMonth() + interval.value * count);
+    else d.setDate(d.getDate() + interval.value * count);
+    return d;
+  };
+  const nextFollowUpDate = applyInterval(form.enrollDate, 1);
+  const estimatedCompletion = applyInterval(form.enrollDate, study.followUpCount || 1);
+
   return (
     <div className="content">
       <div className="page-head" style={{ marginBottom: 20 }}>
@@ -96,15 +106,20 @@ export function AddPatientScreen({ study, onSave, onCancel }) {
                 ))}
               </div>
             </div>
-            <div className="field-row">
+            <div className="field-row-3">
               <div className="field">
                 <label className="label">Enrollment date <span className="req">*</span></label>
                 <input type="date" className="input" value={form.enrollDate} onChange={(e) => set({ enrollDate: e.target.value })}/>
               </div>
               <div className="field">
+                <label className="label">Next follow-up</label>
+                <input className="input" value={fmtDate(nextFollowUpDate)} readOnly/>
+                <div className="hint">First visit after enrollment.</div>
+              </div>
+              <div className="field">
                 <label className="label">Estimated completion</label>
-                <input className="input" value={fmtDate(study.endDate)} readOnly/>
-                <div className="hint">Based on study end date.</div>
+                <input className="input" value={fmtDate(estimatedCompletion)} readOnly/>
+                <div className="hint">Enrollment + {study.followUpCount || 1} follow-ups.</div>
               </div>
             </div>
           </div>

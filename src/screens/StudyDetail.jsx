@@ -3,7 +3,7 @@ import { Icon } from '../lib/icons';
 import { ARM_COLORS, fmtDateShort, daysFromNow } from '../lib/helpers';
 import { StatusPill } from './Dashboard';
 
-export function StudyDetailScreen({ study, onAddPatient }) {
+export function StudyDetailScreen({ study, onAddPatient, onSelectPatient }) {
   const [activeArm, setActiveArm] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -107,11 +107,11 @@ export function StudyDetailScreen({ study, onAddPatient }) {
           {study.arms.map((arm, i) => {
             const rows = filtered.filter((p) => p.arm === i);
             if (rows.length === 0) return null;
-            return <ArmTable key={i} arm={arm} armIdx={i} rows={rows}/>;
+            return <ArmTable key={i} arm={arm} armIdx={i} rows={rows} onSelectPatient={onSelectPatient}/>;
           })}
         </div>
       ) : (
-        <ArmTable arm={study.arms[activeArm]} armIdx={activeArm} rows={filtered}/>
+        <ArmTable arm={study.arms[activeArm]} armIdx={activeArm} rows={filtered} onSelectPatient={onSelectPatient}/>
       )}
     </div>
   );
@@ -148,7 +148,7 @@ function RingProgress({ pct, value, armBreakdowns, arms }) {
   );
 }
 
-function ArmTable({ arm, armIdx, rows }) {
+function ArmTable({ arm, armIdx, rows, onSelectPatient }) {
   const completed = rows.filter((p) => p.status === 'completed').length;
   const active = rows.filter((p) => p.status === 'active').length;
   const lost = rows.filter((p) => p.status === 'lost').length;
@@ -174,7 +174,7 @@ function ArmTable({ arm, armIdx, rows }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((p) => <PatientRow key={p.id} p={p}/>)}
+            {rows.map((p) => <PatientRow key={p.id} p={p} onSelect={onSelectPatient}/>)}
           </tbody>
         </table>
       </div>
@@ -182,11 +182,11 @@ function ArmTable({ arm, armIdx, rows }) {
   );
 }
 
-function PatientRow({ p }) {
+function PatientRow({ p, onSelect }) {
   const overdue = p.overdueDays > 0;
   const d = daysFromNow(p.nextVisitDate);
   return (
-    <tr>
+    <tr style={{ cursor: 'pointer' }} onClick={() => onSelect?.(p)}>
       <td>
         <div className="patient-row">
           <div className="avatar">{p.name.split(' ').map((s) => s[0]).slice(0, 2).join('').toUpperCase()}</div>
@@ -217,7 +217,7 @@ function PatientRow({ p }) {
         )}
       </td>
       <td><StatusPill status={p.status}/></td>
-      <td><button className="icon-btn" style={{ width: 28, height: 28 }}><Icon name="moreHoriz" size={14}/></button></td>
+      <td><span style={{ color: 'var(--text-subtle)' }}><Icon name="chevronRight" size={15}/></span></td>
     </tr>
   );
 }
