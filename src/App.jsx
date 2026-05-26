@@ -56,6 +56,15 @@ function rowToPatient(row) {
   };
 }
 
+function withComputedNextVisit(p, followUpInterval) {
+  if (p.status !== 'active' || !followUpInterval?.value) return p;
+  const d = new Date(p.enrollDate);
+  const n = p.completedVisits + 1;
+  if (followUpInterval.unit === 'months') d.setMonth(d.getMonth() + followUpInterval.value * n);
+  else d.setDate(d.getDate() + followUpInterval.value * n);
+  return { ...p, nextVisitDate: d, overdueDays: Math.max(0, -daysFromNow(d)) };
+}
+
 function studyToRow(s, userId) {
   const arms = s.arms.map((a) => ({ ...a, target: parseInt(a.target) || 0 }));
   const followUp = s.followUpCount
@@ -118,11 +127,12 @@ function App() {
 
       if (error || !data) { setScreen('design'); return; }
 
+      const studyObj = rowToStudy(data);
       const patients = (data.patients || [])
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .map(rowToPatient);
+        .map((row) => withComputedNextVisit(rowToPatient(row), studyObj.followUpInterval));
 
-      setStudy({ ...rowToStudy(data), patients });
+      setStudy({ ...studyObj, patients });
       setScreen('dashboard');
     } catch {
       setScreen('design');
@@ -286,7 +296,7 @@ function App() {
     const { data, error } = await supabase.from('patients').insert(row).select().single();
     if (error) { showToast('Failed to enroll: ' + error.message); return; }
 
-    setStudy((s) => ({ ...s, patients: [rowToPatient(data), ...s.patients] }));
+    setStudy((s) => ({ ...s, patients: [withComputedNextVisit(rowToPatient(data), study.followUpInterval), ...s.patients] }));
     showToast(`${p.name} enrolled in ${study.arms[p.arm].name}.`);
     if (!andAnother) setScreen('dashboard');
   };
