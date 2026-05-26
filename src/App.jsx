@@ -88,6 +88,7 @@ function App() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toast, setToast] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary', PRIMARY);
@@ -156,19 +157,27 @@ function App() {
   // ── auth handler ──────────────────────────────────────────────────────────
 
   const handleAuth = async ({ name, email, password, mode }) => {
-    if (mode === 'signup') {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name } },
-      });
-      if (error) { showToast(error.message); return; }
-      if (data.user) {
-        await supabase.from('profiles').insert({ id: data.user.id, full_name: name });
+    setAuthLoading(true);
+    try {
+      if (mode === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } },
+        });
+        if (error) { showToast(error.message); return; }
+        if (data.user) {
+          await supabase.from('profiles').insert({ id: data.user.id, full_name: name }).maybeSingle();
+        }
+        if (data.session?.user) await applySession(data.session.user);
+        else if (data.user) await applySession(data.user);
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { showToast(error.message); return; }
+        if (data.session?.user) await applySession(data.session.user);
       }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { showToast(error.message); return; }
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -293,7 +302,7 @@ function App() {
     );
   }
 
-  if (screen === 'signup') return <AuthScreen onSubmit={handleAuth} />;
+  if (screen === 'signup') return <AuthScreen onSubmit={handleAuth} loading={authLoading} />;
   if (screen === 'design') return <StudyDesignScreen onSave={handleSaveStudy} onSkip={handleSkipDesign} />;
 
   const overdueCount = study ? study.patients.filter((p) => p.overdueDays > 0).length : 0;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../lib/icons';
 
-export function AuthScreen({ onSubmit }) {
+export function AuthScreen({ onSubmit, loading = false }) {
   const [mode, setMode] = useState('signup');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -99,9 +99,11 @@ export function AuthScreen({ onSubmit }) {
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary btn-lg" disabled={!valid}>
-            {mode === 'signup' ? 'Create account' : 'Sign in'}
-            <Icon name="arrowRight" size={14}/>
+          <button type="submit" className="btn btn-primary btn-lg" disabled={!valid || loading}>
+            {loading
+              ? (mode === 'signup' ? 'Creating account…' : 'Signing in…')
+              : (mode === 'signup' ? 'Create account' : 'Sign in')}
+            {!loading && <Icon name="arrowRight" size={14}/>}
           </button>
 
           <div className="auth-foot-link">
