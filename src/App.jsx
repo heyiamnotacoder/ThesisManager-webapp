@@ -96,6 +96,7 @@ function App() {
   const [study, setStudy] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -322,11 +323,12 @@ function App() {
       <Sidebar
         screen={screen} setScreen={setScreen} user={user} study={study}
         overdueCount={overdueCount} collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((v) => !v)}
+        onToggle={() => setMobileSidebarOpen((v) => !v)}
+        mobileOpen={mobileSidebarOpen}
         onSignOut={handleSignOut}
       />
       <div className="main">
-        <Topbar screen={screen} overdueCount={overdueCount} study={study} />
+        <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} />
         {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} />}
         {screen === 'add' && study && <AddPatientScreen study={study} onSave={handleAddPatient} onCancel={() => setScreen('dashboard')} />}
         {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} onSelectPatient={(p) => { setSelectedPatient(p); setScreen('patient-detail'); }} />}

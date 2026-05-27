@@ -1132,3 +1132,150 @@ a { color: var(--primary); text-decoration: none; }
   .split-2 { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ====== Mobile (hamburger + off-canvas sidebar) ====== */
+.hamburger-btn { display: none; }
+.auth-mobile-tagline { display: none; }
+
+@media (max-width: 768px) {
+  /* ── Hamburger ── */
+  .hamburger-btn {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ── App shell: prevent table overflow from widening the page ── */
+  .app { overflow-x: hidden; }
+  .main { overflow-x: hidden; }
+
+  /* ── Sidebar: off-canvas ── */
+  .sidebar {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    height: 100dvh;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    width: 260px !important;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar[data-mobile-open="true"] { transform: translateX(0); }
+
+  /* Always show full content inside mobile drawer */
+  .sidebar .brand-text,
+  .sidebar .nav-label,
+  .sidebar .study-pill,
+  .sidebar .user-meta { display: revert !important; }
+  .sidebar .nav-item { justify-content: flex-start !important; padding: 9px 10px !important; }
+  .sidebar .sidebar-section { padding: 14px 12px !important; }
+
+  /* ── Backdrop ── */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 199;
+    animation: backdrop-in 0.18s ease;
+  }
+  .sidebar-backdrop.visible { display: block; }
+  @keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Topbar ── */
+  .topbar { padding: 0 14px; gap: 10px; }
+  .topbar h1 { font-size: 14px; }
+  .topbar .crumbs { display: none; }
+
+  /* ── Content ── */
+  .content { padding: 16px 14px 80px; }
+  [data-density="compact"] .content { padding: 12px 10px 60px; }
+
+  /* ── Hero ── */
+  .hero { padding: 20px; }
+  .hero-grid { grid-template-columns: 1fr !important; gap: 20px; }
+  .ring-wrap { width: 160px; height: 160px; margin: 0 auto; }
+  .ring-svg { width: 160px !important; height: 160px !important; }
+  .ring-value { font-size: 36px; }
+  .ring-sub { font-size: 11px; }
+  .hero-title { font-size: 22px !important; }
+  .hero-metrics,
+  .hero-metrics.cols-3,
+  .hero-metrics.cols-5 { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* ── Auth: top banner + centered form + bottom tagline ── */
+  .auth-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    grid-template-columns: unset;
+  }
+  .auth-side {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 24px;
+    height: 76px;
+    flex-shrink: 0;
+    justify-content: flex-start;
+  }
+  .auth-side .auth-hero,
+  .auth-side .auth-foot { display: none; }
+  .auth-side .auth-brand { font-size: 15px; gap: 14px; }
+  /* Brand mark needs contrast against the blue banner */
+  .auth-side .auth-brand .brand-mark {
+    background: rgba(255, 255, 255, 0.22);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+  .auth-main { flex: 1; padding: 32px 24px; align-items: center; }
+  .auth-mobile-tagline {
+    display: block;
+    background: var(--primary);
+    padding: 22px 28px 32px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13.5px;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* ── Form grids ── */
+  .field-row { grid-template-columns: 1fr; }
+  .field-row-3 { grid-template-columns: 1fr; }
+
+  /* ── Layout splits ── */
+  .split-2 { grid-template-columns: 1fr; }
+  .split-1-1 { grid-template-columns: 1fr; }
+
+  /* ── Filter bar ── */
+  .filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .filter-bar .input-group { max-width: 100% !important; }
+  .filter-bar .seg { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .filter-bar .select { width: 100% !important; margin-left: 0 !important; }
+
+  /* ── Tables ── */
+  .scroll-x { -webkit-overflow-scrolling: touch; }
+
+  /* ── Stat grid ── */
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── Design shell ── */
+  .design-content { padding: 20px 14px 60px; }
+  .design-topbar { padding: 0 14px; }
+
+  /* ── Page head ── */
+  .page-head { gap: 10px; }
+  .page-head h2 { font-size: 18px; }
+}

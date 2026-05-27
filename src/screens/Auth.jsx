@@ -115,6 +115,7 @@ export function AuthScreen({ onSubmit, loading = false }) {
           </div>
         </form>
       </main>
+      <div className="auth-mobile-tagline">Never lose track of your thesis again.</div>
     </div>
   );
 }
