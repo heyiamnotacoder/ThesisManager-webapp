@@ -104,6 +104,9 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    // style.setProperty() is an inline style and overrides any CSS rule including
+    // [data-theme="dark"], so --primary-soft must be set here rather than in CSS.
+    document.documentElement.style.setProperty('--primary-soft', darkMode ? '#172554' : tinted(PRIMARY, 0.08));
   }, [darkMode]);
 
   const handleToggleDark = () => setDarkMode((v) => !v);
@@ -111,8 +114,8 @@ function App() {
   useEffect(() => {
     document.documentElement.style.setProperty('--primary', PRIMARY);
     document.documentElement.style.setProperty('--primary-hover', shade(PRIMARY, -8));
-    document.documentElement.style.setProperty('--primary-soft', tinted(PRIMARY, 0.08));
     document.documentElement.style.setProperty('--primary-ring', hexA(PRIMARY, 0.18));
+    // --primary-soft is handled by the darkMode effect to stay in sync with the theme.
   }, []);
 
   const showToast = (msg) => {

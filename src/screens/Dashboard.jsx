@@ -157,7 +157,7 @@ function ArmDistributionCard({ study, armCounts }) {
               <div className="arm-row" key={i}>
                 <div className="arm-row-head">
                   <strong>
-                    <span className="chip chip-blue" style={{ marginRight: 8, background: ARM_COLORS[i] + '22', color: ARM_COLORS[i], borderColor: ARM_COLORS[i] + '55' }}>
+                    <span className="chip" style={{ marginRight: 8, background: ARM_COLORS[i], color: '#fff', border: 'none', padding: '2px 8px' }}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     {arm.name}

@@ -1,4 +1,4 @@
-export const ARM_COLORS = ['#1e3a8a', '#3b82f6', '#0ea5e9'];
+export const ARM_COLORS = ['#4361d8', '#3b82f6', '#0ea5e9'];
 
 export const fmtDate = (d) => {
   if (!d) return '—';

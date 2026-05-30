@@ -88,7 +88,7 @@ export function StudyDetailScreen({ study, onAddPatient, onSelectPatient }) {
           <button className="seg-btn" data-active={activeArm === 'all'} onClick={() => setActiveArm('all')}>All arms <span className="seg-count">{study.patients.length}</span></button>
           {study.arms.map((arm, i) => (
             <button key={i} className="seg-btn" data-active={activeArm === i} onClick={() => setActiveArm(i)}>
-              <span className="arm-letter" style={{ width: 18, height: 18, fontSize: 10, background: ARM_COLORS[i] + '22', color: ARM_COLORS[i] }}>{String.fromCharCode(65 + i)}</span>
+              <span className="arm-letter" style={{ width: 18, height: 18, fontSize: 10, background: ARM_COLORS[i], color: '#fff' }}>{String.fromCharCode(65 + i)}</span>
               {arm.name.split(' ')[0]}
               <span className="seg-count">{study.patients.filter((p) => p.arm === i).length}</span>
             </button>
