@@ -99,12 +99,23 @@ function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    // style.setProperty() is an inline style and overrides any CSS rule including
+    // [data-theme="dark"], so --primary-soft must be set here rather than in CSS.
+    document.documentElement.style.setProperty('--primary-soft', darkMode ? '#172554' : tinted(PRIMARY, 0.08));
+  }, [darkMode]);
+
+  const handleToggleDark = () => setDarkMode((v) => !v);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary', PRIMARY);
     document.documentElement.style.setProperty('--primary-hover', shade(PRIMARY, -8));
-    document.documentElement.style.setProperty('--primary-soft', tinted(PRIMARY, 0.08));
     document.documentElement.style.setProperty('--primary-ring', hexA(PRIMARY, 0.18));
+    // --primary-soft is handled by the darkMode effect to stay in sync with the theme.
   }, []);
 
   const showToast = (msg) => {
@@ -354,9 +365,10 @@ function App() {
         mobileOpen={mobileSidebarOpen}
         onSignOut={handleSignOut}
         onDeleteAccount={handleDeleteAccount}
+        darkMode={darkMode} onToggleDark={handleToggleDark}
       />
       <div className="main">
-        <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} />
+        <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} darkMode={darkMode} onToggleDark={handleToggleDark} />
         {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} onDeleteStudy={handleDeleteStudy} />}
         {screen === 'add' && study && <AddPatientScreen study={study} onSave={handleAddPatient} onCancel={() => setScreen('dashboard')} />}
         {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} onSelectPatient={(p) => { setSelectedPatient(p); setScreen('patient-detail'); }} />}

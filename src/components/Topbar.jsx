@@ -8,7 +8,7 @@ const TITLES = {
   'patient-detail': 'Patient',
 };
 
-export function Topbar({ screen, overdueCount, study, onToggleSidebar }) {
+export function Topbar({ screen, overdueCount, study, onToggleSidebar, darkMode, onToggleDark }) {
   return (
     <header className="topbar">
       <button className="hamburger-btn" onClick={onToggleSidebar} aria-label="Open menu">
@@ -16,7 +16,17 @@ export function Topbar({ screen, overdueCount, study, onToggleSidebar }) {
       </button>
       <h1>{TITLES[screen]}</h1>
       <span className="crumbs">/ {study?.shortName || study?.name || ''}</span>
-      <div className="topbar-actions"/>
+      <div className="topbar-actions">
+        {onToggleDark && (
+          <button
+            className="icon-btn topbar-theme-toggle"
+            onClick={onToggleDark}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <Icon name={darkMode ? 'sun' : 'moon'} size={16}/>
+          </button>
+        )}
+      </div>
     </header>
   );
 }

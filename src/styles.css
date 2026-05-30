@@ -369,6 +369,7 @@ a { color: var(--primary); text-decoration: none; }
 }
 .radio-card-title { font-weight: 600; font-size: 13.5px; }
 .radio-card-desc { font-size: 12px; color: var(--text-muted); }
+[data-theme="dark"] .radio-card[data-active="true"] { border-color: var(--blue-300); }
 
 .chip {
   display: inline-flex;
@@ -750,6 +751,7 @@ a { color: var(--primary); text-decoration: none; }
   font-weight: 600;
   font-size: 13px;
 }
+[data-theme="dark"] .arm-letter { color: var(--blue-300); }
 
 /* ====== Stepper ====== */
 .stepper {
@@ -1135,10 +1137,12 @@ a { color: var(--primary); text-decoration: none; }
 
 /* ====== Mobile (hamburger + off-canvas sidebar) ====== */
 .hamburger-btn { display: none; }
+.topbar-theme-toggle { display: none; }
 .auth-mobile-tagline { display: none; }
 
 @media (max-width: 768px) {
-  /* ── Hamburger ── */
+  /* ── Hamburger & topbar theme toggle ── */
+  .topbar-theme-toggle { display: grid; }
   .hamburger-btn {
     display: grid;
     place-items: center;
