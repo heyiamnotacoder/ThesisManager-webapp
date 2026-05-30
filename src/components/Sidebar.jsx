@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../lib/icons';
 
-export function Sidebar({ screen, setScreen, user, study, overdueCount, collapsed, onToggle, mobileOpen, onSignOut, onDeleteAccount }) {
+export function Sidebar({ screen, setScreen, user, study, overdueCount, collapsed, onToggle, mobileOpen, onSignOut, onDeleteAccount, darkMode, onToggleDark }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
   const items = [
@@ -89,6 +89,11 @@ export function Sidebar({ screen, setScreen, user, study, overdueCount, collapse
             </div>
           )}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+            {onToggleDark && (
+              <button className="icon-btn" onClick={onToggleDark} title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+                <Icon name={darkMode ? 'sun' : 'moon'} size={15}/>
+              </button>
+            )}
             {onDeleteAccount && (
               <button className="icon-btn" onClick={() => setShowDeleteModal(true)} title="Delete account" style={{ color: 'var(--text-subtle)' }}>
                 <Icon name="trash" size={14}/>

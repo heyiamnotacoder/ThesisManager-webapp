@@ -1135,10 +1135,12 @@ a { color: var(--primary); text-decoration: none; }
 
 /* ====== Mobile (hamburger + off-canvas sidebar) ====== */
 .hamburger-btn { display: none; }
+.topbar-theme-toggle { display: none; }
 .auth-mobile-tagline { display: none; }
 
 @media (max-width: 768px) {
-  /* ── Hamburger ── */
+  /* ── Hamburger & topbar theme toggle ── */
+  .topbar-theme-toggle { display: grid; }
   .hamburger-btn {
     display: grid;
     place-items: center;

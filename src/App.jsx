@@ -99,6 +99,14 @@ function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  const handleToggleDark = () => setDarkMode((v) => !v);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--primary', PRIMARY);
@@ -354,9 +362,10 @@ function App() {
         mobileOpen={mobileSidebarOpen}
         onSignOut={handleSignOut}
         onDeleteAccount={handleDeleteAccount}
+        darkMode={darkMode} onToggleDark={handleToggleDark}
       />
       <div className="main">
-        <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} />
+        <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} darkMode={darkMode} onToggleDark={handleToggleDark} />
         {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} onDeleteStudy={handleDeleteStudy} />}
         {screen === 'add' && study && <AddPatientScreen study={study} onSave={handleAddPatient} onCancel={() => setScreen('dashboard')} />}
         {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} onSelectPatient={(p) => { setSelectedPatient(p); setScreen('patient-detail'); }} />}
