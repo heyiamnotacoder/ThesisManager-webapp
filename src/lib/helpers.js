@@ -1,5 +1,3 @@
-export const TODAY = '2026-05-25';
-
 export const ARM_COLORS = ['#1e3a8a', '#3b82f6', '#0ea5e9'];
 
 export const fmtDate = (d) => {
@@ -14,7 +12,7 @@ export const fmtDateShort = (d) => {
 
 export const daysFromNow = (d) => {
   if (!d) return null;
-  const today = new Date(TODAY);
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
   const date = new Date(d);
   date.setHours(0, 0, 0, 0);
