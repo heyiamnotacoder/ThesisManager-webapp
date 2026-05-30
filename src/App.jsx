@@ -88,6 +88,79 @@ function studyToRow(s, userId) {
   };
 }
 
+// ── App shell skeleton ────────────────────────────────────────────────────────
+
+function AppShellSkeleton() {
+  return (
+    <div className="app">
+      <nav className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-mark" style={{ opacity: 0.35 }}>T</div>
+          <span className="sk" style={{ width: 100, height: 14 }} />
+        </div>
+        <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+          {[100, 80, 90, 70, 85].map((w, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 8 }}>
+              <span className="sk" style={{ width: 18, height: 18, borderRadius: 4 }} />
+              <span className="sk" style={{ width: w, height: 13 }} />
+            </div>
+          ))}
+        </div>
+      </nav>
+      <div className="main">
+        <header className="topbar">
+          <span className="sk" style={{ width: 180, height: 17 }} />
+        </header>
+        <div className="content">
+          <section className="hero">
+            <div className="hero-grid">
+              <span className="sk-white" style={{ width: 160, height: 160, borderRadius: '50%', margin: '0 auto' }} />
+              <div className="hero-content">
+                <span className="sk-white" style={{ width: 140, height: 12 }} />
+                <span className="sk-white" style={{ width: '70%', height: 26 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span className="sk-white" style={{ width: '85%', height: 12 }} />
+                  <span className="sk-white" style={{ width: '55%', height: 12 }} />
+                </div>
+              </div>
+            </div>
+          </section>
+          <div className="stat-grid" style={{ marginBottom: 20 }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="stat-card">
+                <span className="sk" style={{ width: 70, height: 11 }} />
+                <span className="sk" style={{ width: 50, height: 28, marginTop: 8 }} />
+                <span className="sk" style={{ width: 90, height: 11, marginTop: 6 }} />
+              </div>
+            ))}
+          </div>
+          <div className="split-2">
+            {[0, 1].map((i) => (
+              <div key={i} className="card">
+                <div className="card-head">
+                  <span className="sk" style={{ width: 100, height: 14 }} />
+                </div>
+                <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: j < 3 ? '1px solid var(--border)' : 'none' }}>
+                      <span className="sk" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        <span className="sk" style={{ width: '65%', height: 13 }} />
+                        <span className="sk" style={{ width: '40%', height: 11 }} />
+                      </div>
+                      <span className="sk" style={{ width: 52, height: 22, borderRadius: 20 }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 
 function App() {
@@ -342,14 +415,7 @@ function App() {
 
   // ── render ────────────────────────────────────────────────────────────────
 
-  if (screen === 'loading') {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 16 }}>
-        <div className="brand-mark">T</div>
-        <p className="subtle" style={{ fontSize: 13 }}>Loading…</p>
-      </div>
-    );
-  }
+  if (screen === 'loading') return <AppShellSkeleton />;
 
   if (screen === 'signup') return <AuthScreen onSubmit={handleAuth} loading={authLoading} />;
   if (screen === 'design') return <StudyDesignScreen onSave={handleSaveStudy} onSkip={handleSkipDesign} />;
