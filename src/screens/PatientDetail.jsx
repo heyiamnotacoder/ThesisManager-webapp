@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Icon } from '../lib/icons';
 import { ARM_COLORS, fmtDate, fmtDateShort, daysFromNow } from '../lib/helpers';
 import { StatusPill } from './Dashboard';
 
-export function PatientDetailScreen({ patient: p, study, onBack }) {
+export function PatientDetailScreen({ patient: p, study, onBack, onDelete }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const arm = study.arms[p.arm];
   const armColor = ARM_COLORS[p.arm] || ARM_COLORS[0];
   const initials = p.name.split(' ').map((s) => s[0]).slice(0, 2).join('').toUpperCase();
@@ -240,6 +242,31 @@ export function PatientDetailScreen({ patient: p, study, onBack }) {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ── Danger zone ── */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-head">
+          <Icon name="trash" size={15} style={{ color: 'var(--red)' }}/>
+          <h3 className="card-title" style={{ color: 'var(--red)' }}>Danger zone</h3>
+        </div>
+        <div className="card-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontWeight: 500, fontSize: 13.5 }}>Remove patient from study</div>
+            <div style={{ fontSize: 12.5, color: 'var(--text-subtle)', marginTop: 2 }}>Permanently deletes all data for this patient. Cannot be undone.</div>
+          </div>
+          {!confirmDelete ? (
+            <button className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(true)}>
+              <Icon name="trash" size={13}/> Delete patient
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12.5, color: 'var(--red)', fontWeight: 500 }}>This cannot be undone.</span>
+              <button className="btn btn-danger btn-sm" onClick={() => onDelete(p._uuid)}>Confirm delete</button>
+              <button className="btn btn-sm" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            </div>
+          )}
         </div>
       </div>
 
