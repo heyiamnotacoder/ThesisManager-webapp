@@ -302,6 +302,33 @@ function App() {
     if (!andAnother) setScreen('dashboard');
   };
 
+  // ── delete handlers ───────────────────────────────────────────────────────
+
+  const handleDeletePatient = async (patientUuid) => {
+    const { error } = await supabase.from('patients').delete().eq('id', patientUuid);
+    if (error) { showToast('Failed to delete: ' + error.message); return; }
+    setStudy((s) => ({ ...s, patients: s.patients.filter((p) => p._uuid !== patientUuid) }));
+    setSelectedPatient(null);
+    setScreen('detail');
+    showToast('Patient removed.');
+  };
+
+  const handleDeleteStudy = async () => {
+    if (!study?.id) return;
+    const { error } = await supabase.from('studies').delete().eq('id', study.id);
+    if (error) { showToast('Failed to delete study: ' + error.message); return; }
+    setStudy(null);
+    setScreen('design');
+    showToast('Study deleted.');
+  };
+
+  const handleDeleteAccount = async () => {
+    const { error } = await supabase.rpc('delete_user');
+    if (error) { showToast('Failed to delete account: ' + error.message); return; }
+    await supabase.auth.signOut();
+    clearSession();
+  };
+
   // ── render ────────────────────────────────────────────────────────────────
 
   if (screen === 'loading') {
@@ -326,13 +353,14 @@ function App() {
         onToggle={() => setMobileSidebarOpen((v) => !v)}
         mobileOpen={mobileSidebarOpen}
         onSignOut={handleSignOut}
+        onDeleteAccount={handleDeleteAccount}
       />
       <div className="main">
         <Topbar screen={screen} overdueCount={overdueCount} study={study} onToggleSidebar={() => setMobileSidebarOpen((v) => !v)} />
-        {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} />}
+        {screen === 'dashboard' && study && <DashboardScreen study={study} onNavigate={setScreen} onAddPatient={() => setScreen('add')} onDeleteStudy={handleDeleteStudy} />}
         {screen === 'add' && study && <AddPatientScreen study={study} onSave={handleAddPatient} onCancel={() => setScreen('dashboard')} />}
         {screen === 'detail' && study && <StudyDetailScreen study={study} onAddPatient={() => setScreen('add')} onSelectPatient={(p) => { setSelectedPatient(p); setScreen('patient-detail'); }} />}
-        {screen === 'patient-detail' && study && selectedPatient && <PatientDetailScreen patient={selectedPatient} study={study} onBack={() => setScreen('detail')} />}
+        {screen === 'patient-detail' && study && selectedPatient && <PatientDetailScreen patient={selectedPatient} study={study} onBack={() => setScreen('detail')} onDelete={handleDeletePatient} />}
         {screen === 'design-edit' && study && <StudyDesignScreen initialStudy={study} onSave={handleSaveStudy} onSkip={() => setScreen('dashboard')} />}
       </div>
 

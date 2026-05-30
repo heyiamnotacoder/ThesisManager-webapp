@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Icon } from '../lib/icons';
 import { ARM_COLORS, fmtDate, fmtDateShort, daysFromNow } from '../lib/helpers';
 
-export function DashboardScreen({ study, onNavigate, onAddPatient }) {
+export function DashboardScreen({ study, onNavigate, onAddPatient, onDeleteStudy }) {
   const stats = useMemo(() => ({
     armCounts: study.arms.map((_, i) => study.patients.filter((p) => p.arm === i).length),
     completed: study.patients.filter((p) => p.status === 'completed').length,
@@ -92,7 +92,7 @@ export function DashboardScreen({ study, onNavigate, onAddPatient }) {
           </div>
           <div className="row-gap-16">
             <NotificationsCard overdue={overdue} upcoming={upcoming} onNavigate={onNavigate}/>
-            <StudyMetaCard study={study}/>
+            <StudyMetaCard study={study} onDeleteStudy={onDeleteStudy}/>
           </div>
         </div>
       </div>
@@ -325,7 +325,8 @@ export function StatusPill({ status }) {
   return <span className={'chip ' + s.cls}>{s.label}</span>;
 }
 
-function StudyMetaCard({ study }) {
+function StudyMetaCard({ study, onDeleteStudy }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   return (
     <div className="card">
       <div className="card-head">
@@ -343,6 +344,19 @@ function StudyMetaCard({ study }) {
           <dt className="subtle">Baseline fields</dt><dd style={{ margin: 0 }}>{study.baselineFields.length}</dd>
           <dt className="subtle">F/U fields</dt><dd style={{ margin: 0 }}>{study.followUpFields.length}</dd>
         </dl>
+        <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          {!confirmDelete ? (
+            <button className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(true)}>
+              <Icon name="trash" size={13}/> Delete study
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12.5, color: 'var(--red)', fontWeight: 500 }}>All patients will be lost.</span>
+              <button className="btn btn-danger btn-sm" onClick={onDeleteStudy}>Confirm delete</button>
+              <button className="btn btn-sm" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
